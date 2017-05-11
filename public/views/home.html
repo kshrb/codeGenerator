@@ -1,0 +1,45 @@
+<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top:1%;margin-bottom:1%;padding-left:12%;text-align:right">
+    <button class="btn btn-primary btn-sm" ng-click="processSchema()"> Generate Template</button>
+</div>
+<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4" style="height:500px;border:solid 1px gray">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top:10px;text-align:center;padding:0px">
+            <label class="form-control">JSON Schema</label>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding:0px">
+            <textarea class="form-control" style="height:450px" ng-model="JSchema"></textarea>
+        </div>
+    </div>
+    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4" style="height:500px;border:solid 1px gray">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top:10px;text-align:center;padding:0px">
+            <label class="form-control">JSON Object</label>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding:0px">
+            <textarea class="form-control" style="height:450px" disabled></textarea>
+        </div>
+    </div>
+    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4" style="height:500px;border:solid 1px gray">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top:10px;text-align:center;padding:0px">
+            <label class="form-control">HTML Template</label>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding:0px">
+            <textarea class="form-control" style="height:450px" disabled></textarea>
+        </div>
+    </div>
+</div>
+<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="panel-group" id="accordion">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseOne">Processing Log</a>
+                </h4>
+            </div>
+            <div id="collapseOne" class="panel-collapse collapse">
+                <div class="panel-body">
+                    {{status}}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

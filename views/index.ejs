@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html ng-app="codeGeneratorApp">
+<head>
+<title><%=title%></title>
+<base href="/" target="_blank">
+<link rel="stylesheet" href="lib/bootstrap-3.3.7/css/bootstrap.min.css">
+<link rel="stylesheet" href="lib/bootstrap-3.3.7/css/bootstrap-theme.min.css">
+<script src="lib/jquery-3.2.1.min.js"></script>
+<script src="lib/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+<script src="lib/schemaParser/ref-parser.min.js"></script>
+<script src="lib/angular-1.6.4/angular.min.js"></script>
+<script src="lib/angular-1.6.4/angular-route.min.js"></script>
+<script src="lib/renderEngin.js"></script>
+</head>
+<body>
+    <ng-view></ng-view>
+    <script src="js/app.js"></script>
+    <script src="js/controller/homeCtrl.js"></script>
+</body>
+</html>
