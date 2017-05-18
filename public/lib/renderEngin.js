@@ -41,6 +41,7 @@ function deReferenceJSONSchema(schemaObj, cb) {
             }
         });
     } catch (e) {
+        console.log(e)
         cb(null, e);
     }
 };
@@ -434,7 +435,6 @@ angular.module('renderEngin', [])
 
         }
 
-
         function getPass2Template(type, fromElement, model, lable, optionsList, isArray) {
             if (lable == 'codeListVersion') {
                 return '';
@@ -511,7 +511,7 @@ angular.module('renderEngin', [])
             return htm;
         }
 
-        function getTemplate(type, loopModel) {
+        function getgTemplate(type, loopModel) {
             var htm = '';
             if (type == "start") {
                 arrayNgModelLang = angular.copy(loopModel);
@@ -594,10 +594,6 @@ angular.module('renderEngin', [])
             return templateString;
         }
 
-        /*var availableListOfItemName = ["item1","item2","item3","item4","item5","item6","item7","item8",
-        "item9","item10","item11","item12","item13""item14""item15""item16""item17""item1""item1""item1""item1""item1""item1"
-        "item1""item1""item1""item1""item1""item1""item1""item1""item1""item1""item1""item1""item1""item1""item1""item1"
-        "item1"]*/
         var itemNO = 0;
 
         function pass2UIGenerator(schemaNode, parentType, model) {
@@ -844,11 +840,64 @@ angular.module('renderEngin', [])
             }
         };
 
+        var getTemplate = function(formElem, parentType, aarOrObj, model, lable){
+
+        }
+
+        //pass2UIGenerator
+        function uiGenerator(schemaNode, parentType, model) {
+            var formElems;
+            var aarOrObj;
+            var retHTML = "";
+            if (!model || model == "") {
+                model = moduleId
+            }
+            if (schemaNode.type == 'object') {
+                formElems = schemaNode.properties;
+                aarOrObj = "Object";
+            } else if (schemaNode.type == 'array') {
+                formElems = schemaNode.items.properties;
+                aarOrObj = "Array";
+            } else {
+                formElems = schemaNode;
+            }
+
+            if (formElems) {
+                var formElemsKeys = Object.keys(formElems);
+
+                for (var i = 0; i < formElemsKeys.length; i++) {
+                   
+                    formElem = formElems[formElemsKeys[i]];
+                    var loopModel = model + "." + formElemsKeys[i];
+
+                    if (formElem.oneOf) {
+                        formElem = formElem.oneOf[0];
+                    }
+                    
+                    if (formElem.type && (formElem.type == "array" || formElem.type == "object")) {
+                        if (formElem.type == "array") {
+                            retHTML += '<div ng-repeat="item in ' + loopModel + '">';
+                            retHTML += '</div>';
+                        } else {
+                            retHTML += '<div type:"' + formElem.type + '" ng-model="'+loopModel +'">';
+                            retHTML += uiGenerator(formElem, aarOrObj, loopModel);
+                            retHTML += '</div>';
+                        }
+                    } else if (formElem.type) {
+                        // RENDER HERE
+                        retHTML += "<div TYPE = "+formElem.type+" ng-model = "+loopModel+"></div>";
+                        //retHTML += getTemplate(formElem, parentType, aarOrObj, loopModel, formElemsKeys[i]);
+                    }
+                }
+                return (retHTML);
+            }
+        }
+
         return {
-            getHTML: function (moduleObject) {
+            getHTML: function (dereferencedSchema,options) {
                 return $q(function (resolve, reject) {
 
-                    var JSchema = angular.copy(moduleObject.dereferencedSchema);
+                    var JSchema = angular.copy(dereferencedSchema);
                     if (!JSchema)
                         reject(__errMsgObj['r02']);
 
@@ -863,97 +912,12 @@ angular.module('renderEngin', [])
                     }
 
                     if (!$.isArray(JSchema)) {
-
-                        if (moduleObject._id) {
-                            moduleId = "cust" + moduleObject._id;
-                        } else {
-                            moduleId = moduleObject.ngmodel;
-                        }
-
-                        var analysePromice = analyseRequiredBoxesCSS(JSchema);
-                        analysePromice.then(function (responce) {
-                            var res = responce.data;
-                            var isAVPPresent = responce.avpFlag
-                            var isAnyTypePresent = responce.isAnyTypePresent
-                            var partitionIndex = 0;
-                            var part1Data = [];
-                            var part2Data = [];
-                            //console.log('analyzer responce == ' + JSON.stringify(res));
-                            if (res.length > 1) {
-                                partitionIndex = Math.round(res.length / 2);
-                                res.forEach(function (element, index) {
-                                    if (index >= partitionIndex) {
-                                        part2Data.push(angular.copy(element))
-                                    } else {
-                                        part1Data.push(angular.copy(element))
-                                    }
-                                });
-                                //console.log('part1Data == ' + JSON.stringify(part1Data));
-                                //console.log('part2Data == ' + JSON.stringify(part2Data));
-                            }
-                            //console.log('partitionIndex === ' + partitionIndex);
-
-                            var html = '';
-
-                            if (partitionIndex) {
-                                if (isAVPPresent) {
-                                    //console.log('in part avp')
-                                    html = getPass1Template("UIMultiColWithAVP");
-                                    html = html.replace(/AVPNGMODEL/g, moduleId + '.avpList.stringAVP')
-                                } else {
-                                    //console.log('in part avp else')
-                                    html = getPass1Template("UIMultiColWithoutAVP");
-                                }
-
-                                html = generateUI(part2Data, html, function (htmls) {
-                                    html = htmls + getPass1Template("UIMultiColIntermediate");
-                                    generateUI(part1Data, html, function (htmld) {
-                                        html = htmld + getPass1Template("UIMultiColEnd");
-                                        if (isAnyTypePresent) {
-                                            html = html + '<div class="row" id="anyTypeDataDiv"></div>';
-                                        }
-                                        resolve(html);
-                                    });
-
-                                });
-
-                            } else {
-                                //console.log('in without part');
-                                //console.log('res === ' + JSON.stringify(res));
-                                //[{"type":"object","properties":{"item":{}}}]
-                                if (res[0].properties && res[0].properties.item && isAnyTypePresent) {
-                                    if (isAVPPresent) {
-                                        html = html + '<div class="row"><div class="col-lg-3 col-md-3 col-sm-3 pull-right" style="text-align: right;margin-right:5%;margin-top: -3%;"><a ng-click="showCustomAVPModal(AVPNGMODEL,\'AVPNGMODEL\')"><i class="fa fa-2x fa-list-ul"></i><span class="badge badge-warning">{{AVPNGMODEL.length || 0}}</span></a></div></div>'
-                                        html = html.replace(/AVPNGMODEL/g, moduleId + '.avpList.stringAVP')
-                                        html = html + '<div class="row" id="anyTypeDataDiv"></div>';
-                                    } else {
-                                        html = html + '<div class="row" id="anyTypeDataDiv"></div>';
-                                    }
-
-                                } else {
-                                    if (isAVPPresent) {
-                                        html = getPass1Template("UIMultiColWithAVP");
-                                        html = html.replace(/AVPNGMODEL/g, moduleId + '.avpList.stringAVP')
-                                    } else {
-                                        html = getPass1Template("UIMultiColWithoutAVP");
-                                    }
-                                    html = generateUI(res, html);
-                                    html = html + getPass1Template("UIMultiColIntermediate");
-                                    html = html + getPass1Template("UIMultiColEnd");
-                                    /* if (isAVPPresent) {
-                                         html = getPass1Template("UISingleColWithAVP");
-                                     } else {
-                                         html = getPass1Template("UISingleColWithoutAVP");
-                                     }
-                                     html = generateUI(res, html);
-                                     html = html + getPass1Template("UISingleColEnd");*/
-                                }
-                                resolve(html);
-                            }
-
-                        }, function (err) {
-                            // this block not need to return or execute.
-                        });
+                        
+                        var settings = {"prefix":"model"}
+                        $.extend(settings, options);
+                        moduleId = settings.prefix ;
+                        var htmlstr = uiGenerator(JSchema);
+                        resolve(htmlstr);
                     } else {
                         reject(__errMsgObj['r02']);
                     }
